@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "uniqueTests": 60,
+  "failed": 0,
+  "skipped": 0,
+  "command": "node --test scripts/test-r16-entry-object-recovery.mjs scripts/test-r16-entry-npc-recovery.mjs scripts/test-r16-entry-player-readiness.mjs scripts/test-pinned-bootstrap-chunk.mjs scripts/test-pinned-entry-actor-parts.mjs scripts/test-first-crystal-scene-request.mjs",
+  "rawLogSha256": "603abb22fc05689c89787eab5f6ed5f1071e3ad2cb50b1284ff2a0982e39dbeb",
+  "originalRed": {
+    "passed": false,
+    "tests": 1,
+    "failed": 1,
+    "name": "actual entry-art effect recovers a complete object part after both original header waits fail",
+    "reason": "The actual old Shell effect did not recover the missing pack; expected original image dictionary was not restored after backoff.",
+    "rawLogSha256": "cb64e230e998dbf8346fe40de531bda63f68401934fb32c628ee992cccd4a3ab"
+  },
+  "wholeParityCandidate": false
+}

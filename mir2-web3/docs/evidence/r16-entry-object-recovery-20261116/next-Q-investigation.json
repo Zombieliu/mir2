@@ -1,0 +1,22 @@
+{
+  "originalR2FailureRetained": true,
+  "initialSharedQHelperPassed": true,
+  "afterItsClose": {
+    "questOpen": false,
+    "hudQuestOpen": true,
+    "focus": {
+      "tag": "CANVAS",
+      "id": "mir2-quest-ui-canvas"
+    }
+  },
+  "nextIndependentQOpenFailed": true,
+  "failedKeyInternalStateNotCaptured": true,
+  "sourceParent": "8ebc4f2c2eb06dbe7a6d3455effcebb693623041",
+  "references": {
+    "closeDiary": "apps/web/app/page.tsx:21967",
+    "setShowQuestLog": "apps/web/app/page.tsx:3047",
+    "navigationSignature": "apps/web/lib/use-bevy-hud-ui.ts:69"
+  },
+  "sourceObservation": "onCloseDiary changes the host navigation revision; setShowQuestLog returns after dispatch whenever sharedHud.ready, regardless of dispatch acceptance. readNavigationCurrent rejects a mismatching navigation signature. This suggests a pending-navigation edge to reproduce; does not establish the exact branch taken by failed R2.",
+  "next": "Reproduce the actual Page close/open edge with a pending HUD snapshot; preserve independent diary close when HUD is unavailable and reject stale runtime/session. Capture current navigation diagnostics for any new actual browser replay."
+}

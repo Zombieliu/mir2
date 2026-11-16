@@ -136,10 +136,10 @@ test("the real Shell entry-art effect owns NPC recovery and retires it on cleanu
   }).outputText;
   const response = deferred(), updates = [], entry = fixture(() => response.promise), exports = {};
   let pending, owner;
-  new Function("exports", "warmEntryArt", "process", "loadR16EntryNpcsWithRecovery", "preloadR16EntryObjects", "setEntryNpcs", "setEntryObjects", compiled)(
+  new Function("exports", "warmEntryArt", "process", "loadR16EntryNpcsWithRecovery", "loadR16EntryObjectsWithRecovery", "setEntryNpcs", "setEntryObjects", compiled)(
     exports, true, { env: { MIR2_PINNED_ASSET_VERSION: release } },
     (...args) => { owner = args[1]; pending = entry.loadR16EntryNpcsWithRecovery(...args); return pending; },
-    () => [], v => updates.push(v), () => assert.fail("no object part was provided"),
+    () => null, v => updates.push(v), () => assert.fail("no object part was provided"),
   );
   const cleanup = exports.effect(); assert.equal(owner.aborted, false);
   cleanup(); assert.equal(owner.aborted, true); response.resolve(new Response(bytes)); await pending;

@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-16 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-16 日记关闭候选已补：普通怪物／背包更新不再使关闭令牌失效，世界动作仍校验完整最新草稿；66项／严格隔离构建及繁体默认WebGPU、共享WebGL2两场完整流程通过，原公网Q helper／六字体113／自然帧／两次注销及同角保存均过。原本地R1截图字体等待失败保留，后续仅补原始像素抓图；21覆盖恢复、29份WIP保持、自建进程关闭。未发布，独立域名及公共前后端仍e0／Fo。下一项场景对象包无头后的恢复与公网完整冷启，混合语言和全部R16目标继续active。[新候选、截图与边界](evidence/r16-diary-world-churn-20261116/README.md)。
+2026-11-16 对象包候选补一次受entry生命周期约束的恢复，三包约1.2MB／90张原图保持原字节SHA、优先级high。60项／严格隔离构建通过；繁体默认WebGPU完整原流程通过，共享WebGL2三包及初次Q开关通过，但紧接着重开Q失败，整场false保留，后续字体113／注销重登未执行。24覆盖恢复、28份原WIP字节不变、Shell外部差异逆变换逐字节保留。未发布，独立域名及公共两端仍e0／Fo。下一项复现Q关闭后HUD navigation未应用时的重开，原源码有ready而dispatch拒绝仍return的线索，不能先认定根因；公网冷启、语言和全部R16 Goal继续active。[源、原判定与截图](evidence/r16-entry-object-recovery-20261116/README.md)。
 
 此前fea实际试发的公网原R1签名及136ms首步通过，场景／Native120／Q关闭／注销未过，R2不跑、两端已恢复e0且未还原数据库；原321／233／233行及24配置保持，新增QA保留。简繁出码通过，恢复版签名未重测。英文helper参数compatibility实际选中WebGPU、无回退，早期据名称判断未覆盖默认后端有误。[原失败、纠正与回退](evidence/r16-auth-handoff-20261116/production/README.md)。
 

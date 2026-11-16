@@ -127,7 +127,28 @@ function preloadVisual<T>(
 
 export function preloadR16EntryObjects(pinnedRelease?: string) {
   if (!entryVisualsMatch(pinnedRelease)) return null;
-  return entryVisuals.objectParts.map(part => preloadVisual(part, objectLoads, "low"));
+  return entryVisuals.objectParts.map(part => preloadVisual(part, objectLoads, "high"));
+}
+
+/** Keep verified parts visible; recover each transiently failed part once for the live entry. */
+export function loadR16EntryObjectsWithRecovery(
+  pinnedRelease: string | undefined,
+  owner: AbortSignal,
+  onSettled: (images: R16EntrySpriteImages) => void,
+): Promise<void> | null {
+  if (owner.aborted) return null;
+  const firstParts = preloadR16EntryObjects(pinnedRelease);
+  if (!firstParts) return null;
+  return Promise.all(firstParts.map(async (first, index) => {
+    const images = await first;
+    if (owner.aborted) return;
+    if (images) { onSettled(images); return; }
+    if (!transientVisualFailures.has(first)) return;
+    await waitToRecoverVisual(owner);
+    if (owner.aborted) return;
+    const recovered = await preloadVisual(entryVisuals.objectParts[index], objectLoads, "high", "reload");
+    if (!owner.aborted && recovered) onSettled(recovered);
+  })).then(() => undefined);
 }
 
 export function preloadR16EntryPlayer(pinnedRelease: string | undefined, gender: EntryPlayerGender) {

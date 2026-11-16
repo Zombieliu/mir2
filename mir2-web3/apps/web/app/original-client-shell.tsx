@@ -5,7 +5,7 @@ import { useWindowKeydown } from "../lib/use-window-keydown";
 import { installGameBrowserDefaults } from "../lib/game-browser-defaults";
 import { guildKeyboardOwnsEvent } from "../lib/r16-guild-keyboard";
 import {
-  preloadR16EntryFloor, preloadR16EntryMonsterFrames, loadR16EntryNpcsWithRecovery, preloadR16EntryObjects, loadR16EntryPlayerWithRecovery,
+  preloadR16EntryFloor, preloadR16EntryMonsterFrames, loadR16EntryNpcsWithRecovery, loadR16EntryObjectsWithRecovery, loadR16EntryPlayerWithRecovery,
   R16_ENTRY_FLOOR_BOUNDS, R16_ENTRY_FLOOR_MAP, R16_ENTRY_MONSTER_BOUNDS,
   type R16EntryActorAssets, type R16EntrySpriteImages,
 } from "../lib/r16-entry-scene";
@@ -1954,15 +1954,12 @@ export function OriginalClientShell({
   useEffect(() => {
     if (!warmEntryArt) return;
     const release = process.env.MIR2_PINNED_ASSET_VERSION;
-    let current = true;
     const owner = new AbortController();
     void loadR16EntryNpcsWithRecovery(release, owner.signal, setEntryNpcs);
-    for (const part of preloadR16EntryObjects(release) ?? []) {
-      void part.then((images) => {
-        if (current && images) setEntryObjects((previous) => ({ ...previous, ...images }));
-      });
-    }
-    return () => { current = false; owner.abort(); };
+    void loadR16EntryObjectsWithRecovery(release, owner.signal, (images) => {
+      setEntryObjects((previous) => ({ ...previous, ...images }));
+    });
+    return () => owner.abort();
   }, [warmEntryArt]);
 
   useEffect(() => {

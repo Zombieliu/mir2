@@ -1,0 +1,42 @@
+{
+  "at": "2026-11-16T08:40:13.027Z",
+  "goal": "active",
+  "parent": "8ebc4f2c2eb06dbe7a6d3455effcebb693623041",
+  "candidate": "r16-objects-668e8e04",
+  "unitChecks": 60,
+  "localResults": [
+    {
+      "label": "webgpu-tc",
+      "passed": true,
+      "ackMs": 108,
+      "nativeMs": 31606,
+      "originalObjectImages": 90,
+      "originalBodiesShaVerified": true,
+      "objectsCompleteAfterFirstFrameMs": 29215,
+      "normalLogoutAndReentry": true
+    },
+    {
+      "label": "webgl2-tc",
+      "passed": false,
+      "ackMs": 131,
+      "nativeMs": 28933,
+      "originalObjectImages": 90,
+      "originalBodiesShaVerified": true,
+      "objectsCompleteAfterFirstFrameMs": -1213,
+      "normalLogoutAndReentry": false
+    }
+  ],
+  "allOriginalObjectPinsPreserved": true,
+  "localResourceBoundaryPassed": true,
+  "completeTwoBackendCandidate": false,
+  "productionSource": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "productionChanged": false,
+  "publicOriginalFeaR1UnchangedAndFailed": true,
+  "allOwnedHandlesClosed": true,
+  "privateOverlaysRestored": 24,
+  "unchangedRawWip": 28,
+  "foreignShellPreservedByExactInverse": true,
+  "wholeParityCandidate": false,
+  "humanAccepted": false,
+  "next": "Resolve the recorded close->reopen Q/HUD navigation edge before fresh full candidate/release; public cold delivery, mixed languages and all other R16 goal requirements remain open."
+}

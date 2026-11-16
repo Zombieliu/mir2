@@ -6,7 +6,7 @@ Updated 2026-11-16 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-16 新日记关闭候选通过66项／严格构建，繁体默认WebGPU及共享WebGL2均完成原公网Q helper、六字体113／自然帧／正常注销和同角保存重进；原本地截图字体等待失败保留，21覆盖恢复、29份WIP保持。未发布，正式仍e0／Fo；下一项场景对象包两次20秒无头后的恢复、完整行走和Native冷启。此前fea公网原R1失败及成对回退不改写，全部R16目标继续active。[当前候选](evidence/r16-diary-world-churn-20261116/README.md) · [原试发与回退](evidence/r16-auth-handoff-20261116/production/README.md)。
+2026-11-16 对象包有界恢复的60项／严格构建通过，两后端均读回三包原SHA／90图。默认WebGPU完整通过；共享WebGL2初次Q helper通过后再次开Q失败，原false保留，不具备完整双后端或新发布资格。下一项Q关闭后HUD快照pending时的重开／输入接收回归；保持独立关闭、旧runtime／会话边界与原8／65／120及完整字体图门槛。24覆盖恢复、原WIP保留，公网仍e0／Fo，全部R16范围继续active。[当前证据与下一依据](evidence/r16-entry-object-recovery-20261116/README.md) · [原公网失败](evidence/r16-auth-handoff-20261116/production/README.md)。
 
 ## 保留的当前未结项
 
