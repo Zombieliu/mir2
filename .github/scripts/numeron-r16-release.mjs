@@ -18,261 +18,325 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  source: "306066f29590d1e2e14155d83644fbc19f11a4c3",
   sourceRef: BRANCH,
   sourceCheckpoints: SOURCE_CHECKPOINTS,
-  baseSource: "6ba38557ddb298df72cb9e4a23c48caf542a598e",
+  baseSource: "e0ceea22964c03041d45e49e506b3a8badd6984e",
   assetSource: "f2de762309768b51b39438c2437c14e819df9bf7",
   sourceCommits: [
-  "f16f42c9eacde04b383dd2b25acadfde09a5f2be",
-  "3a1d96c91abaadbad3801207562c925f8da63e90",
-  "7468b3337ac448baf18dc1b362b87acbac5fa635",
-  "e0ceea22964c03041d45e49e506b3a8badd6984e"
+  "2dd2d1ef3c3ca899e1a488caa7d7873be97fddb8",
+  "7de1b38dd26d969bc5daf7cae64261ab70e3285c",
+  "306066f29590d1e2e14155d83644fbc19f11a4c3"
 ],
   changedFiles: [
   {
     "filename": ".github/scripts/numeron-r16-release.mjs",
-    "sha": "e248cae311800cf8205edb0a5543aaa912f1cf99",
+    "sha": "b1455c6a486a623666901039e6bc959e49eb0f10",
     "status": "modified"
   },
   {
     "filename": ".github/scripts/numeron-r16-source-checkpoints.json",
-    "sha": "dfd6ceb1567157e94e9822aa785a3f9d58932027",
+    "sha": "ebd94f84ef8dcb41845ee595425f6ba4d748ec18",
     "status": "modified"
   },
   {
     "filename": ".github/scripts/test-numeron-r16-release.mjs",
-    "sha": "3b4d98f321d5d5688db089a4635b8021f8ce0e64",
+    "sha": "72c7fa540a5cb1f6e3c89079169b48e250c12507",
     "status": "modified"
   },
   {
-    "filename": ".github/workflows/cross-platform-client.yml",
-    "sha": "2c1b4e7ca2d08d497f716b8a201822e3c929cf93",
-    "status": "modified"
-  },
-  {
-    "filename": ".github/workflows/developer-handoff.yml",
-    "sha": "bba10169b4e9a2d05964dd260ea651bbd0d9e1e4",
-    "status": "modified"
-  },
-  {
-    "filename": ".github/workflows/home-agent.yml",
-    "sha": "f97f0e22681794c5e94403da841e27b0780f599a",
-    "status": "modified"
-  },
-  {
-    "filename": ".github/workflows/mir2-candidate-gate.yml",
-    "sha": "6b26a21fbbc045f0169abc5f91aa971091bb6332",
-    "status": "modified"
-  },
-  {
-    "filename": ".github/workflows/promotion-website-release.yml",
-    "sha": "12897bb5692b2a71cc885bbdc1063c8c01bdec4f",
+    "filename": "mir2-web3/apps/web/package.json",
+    "sha": "5fa6bdabd4ad0a47bb5c382a41fdf6eb43c6e451",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
-    "sha": "cffb3b59b45c9390cacbcedac3d8e49850809eea",
+    "sha": "e09f2575d6c174958484579f0b52a625b8b3ad11",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/generate-font-range-pins.mjs",
+    "sha": "e08765e1c1db23cb8e6b74f91606e3c64bdda0c1",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/apps/web/scripts/smoke-asset-font-ranges.mjs",
-    "sha": "fa91b98fcc08e5aa423274e7d61ee0928cadbe11",
+    "sha": "53ec5db2a2b1fe57a729600ea4ed40e5cd715367",
     "status": "modified"
   },
   {
+    "filename": "mir2-web3/apps/web/scripts/test-asset-worker-cjk-progress.mjs",
+    "sha": "2fd63456a4d7f099add042250b7a56c3bfdc7b84",
+    "status": "added"
+  },
+  {
     "filename": "mir2-web3/apps/web/scripts/test-asset-worker-font-ranges.mjs",
-    "sha": "5442da208cbc1d7be7c750fac2cea8834c71cd30",
+    "sha": "80122f6bd65b716d0255044ee80db486eca75d6b",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-    "sha": "7096f65763c5c4dc1517c7392e72012aeed5b614",
+    "sha": "672b0e27f736ff15ce0c9b2a487f3f6eedd63e91",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-    "sha": "280ed67591538d63554996b9dba3c5f32922880f",
+    "sha": "5c890062d0805ca3d05aaadfa28355f49796daf7",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-    "sha": "65f507a5f661dc9fc2ace7f9aed969c21227ba3a",
+    "sha": "39370d2da1f5153a2917d8280f33a6372ca2b2b5",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
-    "sha": "87543f0ee8a1b77d80c65de7b78169c0881a014d",
+    "sha": "e66a56ef421d92aebc15b45e1e45a855ad97484e",
     "status": "modified"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/README.md",
-    "sha": "982c3643379c26b0050e444820ce78a8982dbbbd",
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/.gitattributes",
+    "sha": "905813169aade6a5340ca6b9122430f60e17b380",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/adjacent-tests.log",
-    "sha": "22cfb5dd1169514073220e6e4cff8aff9bd0898f",
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/README.md",
+    "sha": "8deba141baf538a29d88b79478670493e8b68d38",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/chrome-baseline.json",
-    "sha": "3468d34d79381fbab972ef79442dba947d1edc64",
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/adjacent-regression.log",
+    "sha": "35f61105c8ef55ca9dba02be103da14f1123b563",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/chrome-candidate.json",
-    "sha": "68a1f9e6289bb9403aa28ed1e72ec05c8c8dd2d1",
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/chrome-sc-prefix-adjacent.json",
+    "sha": "77717d3617722b4541b4000822a2f3067bb08908",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/private-evidence-pins.json",
-    "sha": "4454031e37f938dd67e7ac74a4148c34b39ddb4c",
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/chrome-sc-progress.json",
+    "sha": "41788d9367fb8ee9957660f00e7774528ccd64c1",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/public-r2-font-interruption.json",
-    "sha": "24a81d02ee129ab9512f2f0e381fbda62820e5fb",
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/chrome-tc-baseline.json",
+    "sha": "364af58f4b59f2ffb5f105a45304a4ceda7132bc",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/remaining-worker-tests.log",
-    "sha": "ce5db5132b091afea176cb0611967e3fa83f2aa5",
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/chrome-tc-prefix.json",
+    "sha": "ba0f83ce996f8a40ebfafa8f0b6e412d54cdb9c7",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/six-original-fonts-after-restart.png",
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/chrome-tc-progress.json",
+    "sha": "7b5fc25f8edd01436fa7abe2e0148baaa95fabd9",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/chrome-tc-range-stall.json",
+    "sha": "fc7a7dcff54a2095521f3841010170ca5b2a6374",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/english-native-quest.png",
+    "sha": "b2e54ec6d780f455302f737033a7cf072f4ce5cd",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/evidence-manifest.json",
+    "sha": "d4c283b4a7f7ca6e565c8787b9d8a8f587a5dd77",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/focused-regression.log",
+    "sha": "c64ee86e99eabeac6ec67416f68d901c1aa3bc95",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/old-worker-expected-failure.log",
+    "sha": "a9372605efa1f06252ba43a7a864af1445f6e622",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/preceding-public-observations.json",
+    "sha": "5b9e2865f54abb711d2988f3c5f97344457c258a",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/public-e0-failed-font-trace.json",
+    "sha": "06c344828ab7aa5baf5cfb12e43a1f11c9535af5",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/runtime-catalog-observation.json",
+    "sha": "168afb6ab817a93939f6bbf8d580b6b256e608d7",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/six-original-fonts.png",
     "sha": "c7b97b8a73e5213c564866c52bcb0caf268bf9d5",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/validation.json",
-    "sha": "568a66e54c8d50dc40b567291c921f1a072498ec",
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/traditional-native-quest-supplement.png",
+    "sha": "866b1417e0262b8b2cb7fee6366a6dd52fcdb066",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/world-r1-native-quest.png",
-    "sha": "07bbd57c1f185084e8842a08ad0a2a843a0cc210",
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/validation.json",
+    "sha": "ae38c0edf2cfb95cc6d80b0ffeb13ddfffd0f372",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/world-r2-native-quest.png",
-    "sha": "8617308529d74fb73e81c571ae758e531f08cb3c",
-    "status": "added"
-  },
-  {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/README.md",
-    "sha": "4586fcdefefa533a906b1ac0fd9ec0e3807b3f53",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/README.md",
+    "sha": "929d1ef4380ebbe0d84925a6bc8f4f40e24dcde6",
     "status": "modified"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/README.md",
-    "sha": "a8716cac03f256147cbcce7b93ddb217560416ae",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/.gitattributes",
+    "sha": "fcbe398c597b2d35bdc16c529d6bd56d4985159a",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/private-evidence-pins.json",
-    "sha": "25ef3928f58b8309bc4b38671b84f7d3550e5252",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/README.md",
+    "sha": "28e075055066dbf29a03e9288d6aa2e4e7f482fd",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/qr-zh-cn-receipt.json",
-    "sha": "9ba5ac56e8fe875b8c7773080f919a0059b84579",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/alias-final.json",
+    "sha": "0bb1e38b60705e00fda70def0c72dd0847ae78a2",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/qr-zh-tw-receipt.json",
-    "sha": "568cdbd8dcc90f38f3ba5e9a00a47289e03114bb",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/backend-artifact.json",
+    "sha": "192b620d1b027941507796ddea8c3e484bea55ea",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r1-original-acceptance.json",
-    "sha": "369848b42f022b553bbb01b6a5fc3eb4f211592f",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/backend-rollout.json",
+    "sha": "3514463cfbc80038866d3bde3a48cda6ad62db55",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r1-original-fonts.json",
-    "sha": "ea6c83db6b3e613fd14aa34d50f9251d380a905d",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/evidence-index.json",
+    "sha": "f4018aa4039923b3dfacbaff4ecfdc68a6760303",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r1-public-hud-after-worker-restart.png",
-    "sha": "2674475702398eb1bd13bae24f40218a1e443e77",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/final-public-readback.json",
+    "sha": "f047b7590b1d7186e8763b396bcabf19ea049b4e",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r1-quest-shared-zh-TW.png",
-    "sha": "29fb89eadf2b8315352facf98f7db96bd42b8d56",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/independent-candidate.json",
+    "sha": "d73b9584b8ca0b5225031b7884c2b3cc93e13755",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r2-original-acceptance.json",
-    "sha": "c3798ff4ff091b78c4a16cad0ba3bc5d9b811044",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/independent-preswitch.json",
+    "sha": "67900982421ea1469eb9da10f2cd78fcdd5b3b0d",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r2-original-fonts.json",
-    "sha": "ea6c83db6b3e613fd14aa34d50f9251d380a905d",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/preservation.json",
+    "sha": "64b97e30fff58c28ca6fef944b66dae5684d60a7",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r2-public-hud-after-worker-restart.png",
-    "sha": "def0ed1e37fbfe51e95ab38b77feea4e122bff78",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/public-q-phases.json",
+    "sha": "7a21a1ef215e41a5599b6bec31baadad9446bceb",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/r2-quest-shared-zh-TW.png",
-    "sha": "e96a2d641980e61da5aae315be978b55f5d48a6c",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/public-q-pixels.json",
+    "sha": "e25ce1bb2277ba9df9cdb63c9abf9d463de7408b",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/production/verification.json",
-    "sha": "a6b738135d44552174d6a12da59722624e5c4ecb",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/public-qr.json",
+    "sha": "c8c15735a8af53213a5a035c274fa879709a8239",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/README.md",
-    "sha": "4752c1fac6eeb10ca73195b9a34b7d98db6ee3e8",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/public-r1-acceptance.json",
+    "sha": "e77c482633c2478a633f1178ad677dfb3cc96bf8",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/all-release-guards.log",
-    "sha": "21d3d0520ade4cdff61985512412d1cd4e812298",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/public-r2-acceptance.json",
+    "sha": "23c1d72e9d2a2d18a4c7a70e8918c7a25e2212e9",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/release-pin.json",
-    "sha": "b1f26ba28a67c1282409909fe53511cd0a167353",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/public-summaries.json",
+    "sha": "92acfd61c5291835c88084a71f61c3c39f268585",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/release-validation.json",
-    "sha": "a4d589015963c87f5b0288891e66d6c58fdee277",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/r1-first-q-black.png",
+    "sha": "1426a70f48edb42d3855d4b90850f46ff2faf180",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/release/source-closure.json",
-    "sha": "95375d481c31c4bcf21d45425beac7cf3f3bf210",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/r1-native-q.png",
+    "sha": "de1ca5bb248386631939713d39835673fe261d9d",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-windows-ci-longpaths-20261116/README.md",
-    "sha": "f381d66c1885b40c96f3ea0599a2ef23b9f1fecb",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/r2-after-worker-restart.png",
+    "sha": "cdc636c1ad7947d319bdc494dd3149233da4850e",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-windows-ci-longpaths-20261116/checkout-receipt.json",
-    "sha": "8dfa7f76b375a5f328d8a35f1636105c6be3a39e",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/r2-first-q-fallback.png",
+    "sha": "cbb41f498f75f6815237e9b7a45bffa1b2b9af1e",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-windows-ci-longpaths-20261116/hosted-checkout.json",
-    "sha": "a7c67d941a59e5e5461387e91b369ec766d35a92",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/r2-native-q.png",
+    "sha": "efc25618c8664dc28c2ecff3d9dff89b69b48814",
     "status": "added"
   },
   {
-    "filename": "mir2-web3/docs/evidence/r16-windows-ci-longpaths-20261116/workflow-verification.json",
-    "sha": "968a929301b793539db6ed97467a4b307017e909",
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/server-canary-qualification.json",
+    "sha": "ee06d14463ff3252c7b04e2b8de8091dbb4e34b9",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/web-check.json",
+    "sha": "d6cd1a9aede3e403a5202e8b40c88d212e3d921a",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/web-promote.json",
+    "sha": "2af7033d8e5afb28e89a03c11f4a37327abf1bb1",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/production/web-stage.json",
+    "sha": "01a3efbc1d2d530d031405d8ce46acd875b981cb",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/release/README.md",
+    "sha": "7730f27f0089ba7a4c095d2c86e51dbcff3f36b4",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/release/release-guards.log",
+    "sha": "f9a296d7eac51ecb83b9baf2097b5d2282e090cb",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/release/release-pin.json",
+    "sha": "5c1c8b6dd32b11dbacc7095c11c0c664754ea1fe",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-prefix-recovery-20261116/release/source-closure.json",
+    "sha": "dfb1adcfa677426df57ac2e5418cdec51a2ef5f6",
     "status": "added"
   }
 ],
@@ -348,11 +412,11 @@ export const QR_RELEASE = Object.freeze({
   },
   entryAssetWorker: {
   "path": "/mir2-asset-worker.js",
-  "bytes": 68357,
-  "sha256": "9c301d24217f498408d77eb0b38f88f9c6825020d7d380ed2c383022db615f97"
+  "bytes": 72815,
+  "sha256": "5369d5c2a5c51a89e892ad5e283d63b36a2bf0f24cc035b5a3d81cd5e599bbdb"
 },
   assetRunId: '42494701555',
-  baseline: "dpl_G8iq4UBFibrWSEaSbwahtboeAom3",
+  baseline: "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-check', 'numeron-qr-promote', 'numeron-qr-rollback'];

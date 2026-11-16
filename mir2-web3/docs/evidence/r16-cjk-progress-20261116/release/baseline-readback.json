@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-11-16T00:46:08.467Z",
+  "alias": {
+    "alias": "numeron.obelisk.build",
+    "deploymentId": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+    "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC"
+  },
+  "deployment": {
+    "id": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+    "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+    "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+    "readyState": "READY"
+  }
+}

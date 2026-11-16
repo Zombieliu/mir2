@@ -81,6 +81,15 @@ TC 的整包中断也沿用原配置版本、存储权限、撤销及缓存期�
 接下来准备本候选的同源 Linux／PG／资产及成对发布资格，再做原两场公网门槛。
 新发布控制器必须以 e0／Fo 为上版，不能重跑仍固定旧 6ba／G8 的历史控制器。
 
+发布保护配置现已更新为本候选 `306066f29590d1e2e14155d83644fbc19f11a4c3`，
+上版固定 e0／Fo。独立 GitHub 比较核对 3 个提交、62 个文件，两个检查点分别为 37／29 个文件；
+Worker 72,815 字节，SHA `5369d5c2a5c51a89e892ad5e283d63b36a2bf0f24cc035b5a3d81cd5e599bbdb`。
+**88 项发布保护测试通过**。仅修改发布 pin 及对应精确测试，没有据此切换生产。
+[固定配置与源码检查](release/release-pin.json) · [源码闭包](release/source-closure.json) ·
+[独立正式读回](release/baseline-readback.json) · [88 项输出](release/release-guards.log)。
+同源 [Linux／Postgres CI](https://github.com/Zombieliu/mir2/actions/runs/43782096198) 已启动，
+在完成前不认领其结果；后续候选构建、切流和公网两场仍须独立验收。
+
 首次冷 Q、其他线路／地图／断网、三职业完整 1–30、阿洛、语言像素、Windows 真窗口和实体手机继续。
 本轮[词库核对](runtime-catalog-observation.json)确认当前 2,242 项 portable 词库已逐字节嵌入已发运行包。
 TC 词条中部分英文人名也存在于 Native 作者数据，不能仅凭人名就认定 Web 与 Windows 不一致；
