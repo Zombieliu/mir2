@@ -1,0 +1,90 @@
+TAP version 13
+# (node:120116) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: NotoSansCJKsc-Regular.otf: a coalesced body with continual progress can take 16s without a part retry
+not ok 1 - NotoSansCJKsc-Regular.otf: a coalesced body with continual progress can take 16s without a part retry
+  ---
+  duration_ms: 27.591
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-cjk-progress.mjs:204:30'
+  failureType: 'testCodeFailure'
+  error: 'nonempty body progress must renew the original15s idle budget'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-cjk-progress.mjs:219:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: NotoSansTC.ttf: a coalesced body with continual progress can take 16s without a part retry
+not ok 2 - NotoSansTC.ttf: a coalesced body with continual progress can take 16s without a part retry
+  ---
+  duration_ms: 9.6904
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-cjk-progress.mjs:204:30'
+  failureType: 'testCodeFailure'
+  error: 'nonempty body progress must renew the original15s idle budget'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-cjk-progress.mjs:219:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: cache-body verification keeps its fixed bound even when untrusted cached bytes trickle
+ok 3 - cache-body verification keeps its fixed bound even when untrusted cached bytes trickle
+  ---
+  duration_ms: 1.2869
+  type: 'test'
+  ...
+# Subtest: failed current range sources yield to a pinned app body without repeated smaller or whole reads; retained=false
+not ok 4 - failed current range sources yield to a pinned app body without repeated smaller or whole reads; retained=false
+  ---
+  duration_ms: 2.4964
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-cjk-progress.mjs:238:39'
+  failureType: 'testCodeFailure'
+  error: 'known failed range sources must yield promptly to the independent app'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-cjk-progress.mjs:254:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: failed current range sources yield to a pinned app body without repeated smaller or whole reads; retained=true
+not ok 5 - failed current range sources yield to a pinned app body without repeated smaller or whole reads; retained=true
+  ---
+  duration_ms: 7.0607
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-cjk-progress.mjs:238:39'
+  failureType: 'testCodeFailure'
+  error: 'known failed range sources must yield promptly to the independent app'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-cjk-progress.mjs:254:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 1
+# fail 4
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 124.8099

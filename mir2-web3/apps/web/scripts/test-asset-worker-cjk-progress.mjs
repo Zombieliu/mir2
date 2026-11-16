@@ -200,3 +200,101 @@ test("TC Range-ignorant sources still require the original complete digest and r
     await f.flush();
   }
 });
+
+for (const font of families) test(`${font.file}: a coalesced body with continual progress can take 16s without a part retry`, async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let controller, cancelled = false;
+  const owner = new AbortController();
+  const f = fixture(request => {
+    const response = rangeResponse(request);
+    if (request.headers.get("range") !== "bytes=0-1048575") return response;
+    return new Response(new ReadableStream({ start(c) { controller = c; }, cancel() { cancelled = true; } }), response);
+  });
+  f.context.ownedFont = new Request(origin + font.path, { signal: owner.signal });
+  const pending = vm.runInContext("fetchStaticAsset(ownedFont)", f.context);
+  t.after(async () => { owner.abort(); await pending; });
+  await waitFor(() => controller);
+  for (let n = 0; n < 4; n++) {
+    t.mock.timers.tick(4000); await turn();
+    assert(!cancelled, "nonempty body progress must renew the original15s idle budget");
+    controller.enqueue(font.bytes.subarray(n * 262_144, (n + 1) * 262_144));
+    await turn();
+  }
+  controller.close(); await assertFont(await pending, font); await f.flush();
+  assert.equal(f.calls.filter(request => request.headers.get("range") === "bytes=0-1048575").length, 1);
+  assert(f.calls.every(request => request.headers.has("range")), "no redundant whole font on continuous progress");
+});
+
+test("cache-body verification keeps its fixed bound even when untrusted cached bytes trickle", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let controller, cancelled = false;
+  const f = fixture();
+  f.context.cachedBody = new Response(new ReadableStream({ start(c) { controller = c; }, cancel() { cancelled = true; } }));
+  const pending = vm.runInContext("readPinnedFontBytes(cachedBody,4,null,15000)", f.context);
+  t.mock.timers.tick(7500); controller.enqueue(new Uint8Array([1])); await turn();
+  t.mock.timers.tick(7500); assert.equal(await pending, null); assert(cancelled);
+});
+
+for (const retained of [false, true]) test(`failed current range sources yield to a pinned app body without repeated smaller or whole reads; retained=${retained}`, async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const owner = new AbortController(); let healthy = false;
+  const f = fixture(request => {
+    if (request.url.startsWith(origin)) return rangeResponse(request);
+    if (healthy || retained && request.headers.get("range") === "bytes=0-1048575") return rangeResponse(request);
+    return new Promise(() => {});
+  });
+  vm.runInContext(`runtimeConfig.remoteAssetBaseUrls=['https://cdn.game.test/hotlink-ok/mir2/v/current','${mirror}']`, f.context);
+  f.context.ownedFont = new Request(origin + sc.path, { signal: owner.signal });
+  const pending = vm.runInContext("fetchStaticAsset(ownedFont)", f.context);
+  t.after(async () => { owner.abort(); await pending; });
+  const expected = retained ? 5 : 4;
+  await waitFor(() => f.calls.length === (retained ? 3 : 2));
+  t.mock.timers.tick(8000); await waitFor(() => f.calls.length >= expected);
+  t.mock.timers.tick(8000); await waitFor(() => f.calls.some(r => r.url.startsWith(origin)) || f.calls.length > expected);
+  assert(f.calls.some(r => r.url === origin + sc.path), "known failed range sources must yield promptly to the independent app");
+  assert.equal(f.calls.filter(r => !r.url.startsWith(origin)).length, expected);
+  assert(f.calls.filter(r => !r.url.startsWith(origin)).every(r => r.headers.has("range")), "no second full read of the failed source");
+  await assertFont(await pending, sc); await f.flush();
+  assert.equal(vm.runInContext("staticAssetNegativeCache.size", f.context), 0);
+  healthy = true;
+  const before = f.calls.length; await assertFont(await f.read(sc), sc); await f.flush();
+  assert(f.calls.slice(before).every(r => r.headers.has("range")), "a fresh request can retry recovered sources");
+});
+
+test("a range transport failure does not exclude a healthy whole mirror when the app body is corrupt", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const owner = new AbortController();
+  const corrupt = Buffer.from(sc.bytes); corrupt[12345] ^= 1;
+  const f = fixture(request => request.headers.has("range") ? new Promise(() => {})
+    : new Response(request.url.startsWith(origin) ? corrupt : sc.bytes));
+  vm.runInContext(`runtimeConfig.remoteAssetBaseUrls=['https://cdn.game.test/hotlink-ok/mir2/v/current','${mirror}']`, f.context);
+  f.context.ownedFont = new Request(origin + sc.path, { signal: owner.signal });
+  const pending = vm.runInContext("fetchStaticAsset(ownedFont)", f.context);
+  t.after(async () => { owner.abort(); await pending; });
+  await waitFor(() => f.calls.length === 2);
+  t.mock.timers.tick(8000); await waitFor(() => f.calls.length === 4);
+  t.mock.timers.tick(8000);
+  await assertFont(await pending, sc); await f.flush();
+  assert.deepEqual(f.calls.filter(r => !r.headers.has("range")).map(r => r.url),
+    [origin + sc.path, 'https://cdn.game.test/hotlink-ok/mir2/v/current' + sc.path]);
+});
+
+test("empty network chunks cannot renew the part idle deadline", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let controller, cancelled = false;
+  const f = fixture();
+  f.context.streamedBody = new Response(new ReadableStream({ start(c) { controller = c; }, cancel() { cancelled = true; } }));
+  const pending = vm.runInContext("readPinnedFontBytes(streamedBody,4,null,15000,{idleProgress:true})", f.context);
+  t.mock.timers.tick(10000); controller.enqueue(new Uint8Array()); await turn();
+  t.mock.timers.tick(5000); assert.equal(await pending, null); assert(cancelled);
+});
+
+test("owner cancellation of a pending range is not recorded as a transport failure", async () => {
+  const f = fixture(() => new Promise(() => {})), owner = new AbortController();
+  let failures = 0;
+  f.context.ownerSignal = owner.signal; f.context.noteFailure = () => { failures++; };
+  const pending = vm.runInContext(`readFontRangePart(new Request('${mirror}${sc.path}'),ownerSignal,
+    PINNED_FONT_RANGES['${sc.path}'],0,4,()=>{},noteFailure)`, f.context);
+  await waitFor(() => f.calls.length === 1); owner.abort();
+  assert.equal(await pending, null); assert.equal(failures, 0);
+});

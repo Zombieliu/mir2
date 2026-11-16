@@ -13,7 +13,7 @@ for (let i = 2; i < process.argv.length; i += 2) {
 }
 assert(args.has("--output"));
 const failureMode = args.get("--failure-mode") ?? "range-stall";
-assert(["range-stall", "whole-prefix", "progressing"].includes(failureMode));
+assert(["range-stall", "whole-prefix", "progressing", "chunk-progress", "header-failover"].includes(failureMode));
 const family = args.get("--font") ?? "sc"; assert(["sc", "tc"].includes(family));
 const web = resolve(dirname(fileURLToPath(import.meta.url)), ".."), output = resolve(args.get("--output"));
 await mkdir(output, { recursive: false });
@@ -30,7 +30,7 @@ const targetParts = Math.ceil(fonts.get(target).length / 262144), prefixParts = 
 const proof = { kind: failureMode === "whole-prefix" ? "actual-browser-whole-font-prefix-restart" : "actual-edge-font-range-restart",
   failureMode, family, target, targetParts, workerSha256: sha(worker), noCachePrefill: true,
   fontPins: [...fonts].map(([path, bytes]) => ({ path, bytes: bytes.length, sha256: sha(bytes) })), requests: [], browserClosures: [], passed: false };
-const sockets = new Set(); let app, assets, context, phase = "partial", active = 0, peak = 0;
+const sockets = new Set(); let app, assets, context, phase = "partial", active = 0, peak = 0, activeBodies = 0, peakBodies = 0;
 const serve = (request, response) => {
   const pathname = new URL(request.url, "http://127.0.0.1").pathname;
   response.setHeader("cache-control", "no-store"); response.setHeader("access-control-allow-origin", "*");
@@ -55,6 +55,12 @@ const serve = (request, response) => {
     // the first logical request succeed instead of leaving missing pieces.
     row.injectedWholeFallbackUnavailable = true; response.writeHead(504); response.end(); return;
   }
+  if (failureMode === "header-failover" && phase === "partial" && logical === target
+    && request.socket.localPort !== app.address().port) {
+    row.injectedHeaderStall = true; return;
+  }
+  activeBodies++; peakBodies = Math.max(peakBodies, activeBodies);
+  response.once("close", () => { activeBodies--; });
   response.writeHead(range ? 206 : 200, { "content-type": logical.endsWith(".otf") ? "font/otf" : "font/ttf",
     "content-length": end - offset + 1, ...(range ? { "content-range": `bytes ${offset}-${end}/${original.length}` } : {}) });
   if (failureMode === "whole-prefix" && phase === "partial" && logical === target) {
@@ -69,6 +75,14 @@ const serve = (request, response) => {
     response.flushHeaders();
     const timer = setTimeout(() => response.end(original.subarray(offset, end + 1)), row.injectedProgressDelayMs);
     response.once("close", () => clearTimeout(timer)); return;
+  }
+  if (failureMode === "chunk-progress" && phase === "partial" && logical === target && range && offset === 0) {
+    row.injectedChunkIntervalMs = 4000; response.flushHeaders(); let sent = 0;
+    const timer = setInterval(() => {
+      const next = Math.min(sent + 262144, end + 1); response.write(original.subarray(sent, next)); sent = next;
+      if (sent === end + 1) { clearInterval(timer); response.end(); }
+    }, 4000);
+    response.once("close", () => clearInterval(timer)); return;
   }
   response.end(original.subarray(offset, end + 1));
 };
@@ -113,13 +127,23 @@ try {
   } else if (failureMode === "range-stall") {
     assert.equal(proof.first.status, 504); assert(proof.first.parts.length > 0 && proof.first.parts.length < targetParts);
   } else {
-    assert.equal(proof.first.status, 200); assert.equal(proof.first.parts.length, targetParts);
+    assert.equal(proof.first.status, 200);
     assert.equal(proof.first.bytes, fonts.get(target).length); assert.equal(proof.first.sha256, sha(fonts.get(target)));
-    assert(proof.first.elapsedMs > 24000 && proof.first.elapsedMs < 48000);
-    assert(proof.requests.filter(row => row.logical === target).every(row => row.range), 'progress must not be discarded for a whole-body fallback');
+    if (failureMode === "header-failover") {
+      const attempts = proof.requests.filter(row => row.logical === target);
+      assert.equal(attempts.filter(row => row.range).length, 4, 'each of two failed sources can own only its two initially admitted ranges');
+      assert.equal(attempts.filter(row => !row.range).length, 1, 'one independent complete app read');
+      assert(proof.first.elapsedMs >= 16000 && proof.first.elapsedMs < 22000);
+    } else {
+      assert.equal(proof.first.parts.length, targetParts);
+      assert(proof.first.elapsedMs > (failureMode === "chunk-progress" ? 15000 : 24000)
+        && proof.first.elapsedMs < (failureMode === "chunk-progress" ? 24000 : 48000));
+      assert(proof.requests.filter(row => row.logical === target).every(row => row.range), 'progress must not be discarded for a whole-body fallback');
+      if (failureMode === "chunk-progress") assert.equal(proof.requests.filter(row => row.logical === target && row.offset === 0).length, 1);
+    }
     assert(proof.first.wholePresent);
   }
-  if (failureMode !== "progressing") assert(!proof.first.wholePresent);
+  if (["range-stall", "whole-prefix"].includes(failureMode)) assert(!proof.first.wholePresent);
   await closeBrowser(); phase = "resume";
   page = await launch(origin);
   // No configuration resend or cache population: restore the previous Worker configuration from its own persistent cache.
@@ -150,10 +174,16 @@ try {
   assert(resumed.every(r => r.range));
   const savedOffsets = new Set(proof.first.parts.map(url => Number(url.split('/').at(-2))));
   const fetchedOffsets = resumed.flatMap(row => Array.from({length:Math.ceil(row.bytes/262144)},(_,n)=>row.offset+n*262144));
-  assert.deepEqual(fetchedOffsets.toSorted((a,b)=>a-b),Array.from({length:targetParts},(_,n)=>n*262144).filter(offset=>!savedOffsets.has(offset)));
+  assert.deepEqual(fetchedOffsets.toSorted((a,b)=>a-b),proof.first.wholePresent?[]:Array.from({length:targetParts},(_,n)=>n*262144).filter(offset=>!savedOffsets.has(offset)));
   proof.resumedRequests = resumed.length; proof.resumedPieces = fetchedOffsets.length;
   proof.resumedMissingOnly = true; proof.sixFontsComplete = proof.second.rows.every(r => r.status === 200 && r.decoded);
-  proof.peakServerFontBodies = peak; assert(peak <= 2); assert(proof.sixFontsComplete);
+  // A cancelled header-only request can close on the server in the same event
+  // turn as the fallback starts. Keep the raw lifecycle peak, and separately
+  // enforce the two actual response-body readers in that failover fixture.
+  proof.peakServerFontBodies = peak; proof.peakAdmittedFontBodies = peakBodies;
+  proof.concurrencyScope = 'Raw server request lifetimes retained; header-failover body concurrency excludes cancelled requests that never sent headers or bytes.';
+  assert(peakBodies <= 2); if (failureMode !== "header-failover") assert(peak <= 2);
+  assert(proof.sixFontsComplete);
   await page.screenshot({ path: join(output, 'six-original-fonts-after-restart.png') }); proof.passed = true;
 } catch (error) { proof.failure = { name: error.name, message: error.message }; process.exitCode = 1; }
 finally {

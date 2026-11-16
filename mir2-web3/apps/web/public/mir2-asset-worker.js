@@ -632,15 +632,16 @@ async function fetchStaticAsset(request, fallbackRequests) {
     const pin = pinnedFontRange(request);
     const partCache = fontPartCacheContext(pin);
     const mirrors = pin ? currentReleaseFontMirrors(request, sources, true) : [];
+    const failedRangeSources = new Set();
     let preferAppFont = false;
     if (pin && mirrors.length) {
-      const result = await readPinnedRangeFont(request, pin, mirrors)
+      const result = await readPinnedRangeFont(request, pin, mirrors, failedRangeSources)
         .catch(() => ({ response: null, wholeFallback: false }));
       if (result.response) return result.response;
       // A server ignoring Range may still serve the complete original. A real
       // range failure retains its verified parts for the next logical request.
       if (!result.wholeFallback) return syntheticAssetResponse(504, "font range fetch failed");
-      preferAppFont = result.transferExpired === true;
+      preferAppFont = result.transferExpired === true || failedRangeSources.size > 0;
     }
     // All source attempts share this slot; each source keeps its existing
     // header and body-idle budgets. Do not re-enter the admission queue from
@@ -938,14 +939,15 @@ async function boundedFontCache(operation) {
   finally { clearTimeout(timer); }
 }
 
-async function readPinnedFontBytes(response, expected, signal, timeoutMs) {
+async function readPinnedFontBytes(response, expected, signal, timeoutMs, { idleProgress = false, onInterrupted } = {}) {
   if (!response?.body || signal?.aborted) return null;
   const reader = response.body.getReader();
   let timer, rejectRead;
   const failed = new Promise((_, reject) => { rejectRead = reject; });
   const fail = () => { void reader.cancel().catch(() => {}); rejectRead(new Error("font part stopped")); };
   signal?.addEventListener("abort", fail, { once: true });
-  timer = setTimeout(fail, timeoutMs);
+  const expectProgress = () => { clearTimeout(timer); timer = setTimeout(fail, timeoutMs); };
+  expectProgress();
   try {
     const bytes = new Uint8Array(expected); let offset = 0;
     for (;;) {
@@ -954,8 +956,14 @@ async function readPinnedFontBytes(response, expected, signal, timeoutMs) {
       if (done) return offset === expected ? bytes : null;
       if (offset + value.byteLength > expected) return null;
       bytes.set(value, offset); offset += value.byteLength;
+      // Network ranges share an absolute outer bound. Renew only their idle
+      // timer; cache reads keep the original fixed verification deadline.
+      if (idleProgress && value.byteLength > 0) expectProgress();
     }
-  } catch { return null; }
+  } catch {
+    if (!signal?.aborted) onInterrupted?.();
+    return null;
+  }
   finally {
     clearTimeout(timer); signal?.removeEventListener("abort", fail);
     void reader.cancel().catch(() => {}); reader.releaseLock();
@@ -970,7 +978,7 @@ async function validPinnedFontResponse(response, pin) {
   return bytes && await fontDigest(bytes) === pin.sha256;
 }
 
-async function readFontRangePart(source, owner, pin, index, count, noteWholeFallback) {
+async function readFontRangePart(source, owner, pin, index, count, noteWholeFallback, noteTransportFailure) {
   const offset = index * pin.partBytes, length = Math.min(count * pin.partBytes, pin.bytes - offset);
   const deadline = new AbortController();
   const signal = AbortSignal.any([owner, source.signal, deadline.signal]);
@@ -997,13 +1005,23 @@ async function readFontRangePart(source, owner, pin, index, count, noteWholeFall
     if (response.status !== 206 || response.headers.get("content-range") !== `bytes ${offset}-${offset + length - 1}/${pin.bytes}` ||
         response.headers.get("content-length") !== String(length) ||
         ![null, "identity"].includes(response.headers.get("content-encoding"))) return null;
-    const bytes = await readPinnedFontBytes(response, length, signal, FONT_RANGE_PART_TIMEOUT_MS);
+    const bytes = await readPinnedFontBytes(response, length, signal, FONT_RANGE_PART_TIMEOUT_MS, {
+      idleProgress: true,
+      onInterrupted: () => {
+        if (!owner.aborted && !source.signal.aborted) noteTransportFailure?.();
+      },
+    });
     if (!bytes || signal.aborted) return null;
     for (let part = 0; part < count; part++) {
       if (await fontDigest(bytes.subarray(part * pin.partBytes, (part + 1) * pin.partBytes)) !== pin.parts[index + part]) return null;
     }
     complete = true; return bytes;
-  } catch { return null; }
+  } catch {
+    // A transport/header failure applies to ranges in this font's snapshot.
+    // Owner or outer-budget cancellation says nothing about source health.
+    if (!response && !owner.aborted && !source.signal.aborted) noteTransportFailure?.();
+    return null;
+  }
   finally {
     if (!complete) deadline.abort();
     clearTimeout(timer); signal.removeEventListener("abort", stop);
@@ -1011,7 +1029,7 @@ async function readFontRangePart(source, owner, pin, index, count, noteWholeFall
   }
 }
 
-async function readPinnedRangeFont(request, pin, mirrors) {
+async function readPinnedRangeFont(request, pin, mirrors, failedSources = new Set()) {
   const revision = configurationRevision;
   const name = cacheName(`font-parts-${pin.sha256.slice(0, 16)}`);
   const cache = await boundedFontCache(() => caches.open(name));
@@ -1048,7 +1066,9 @@ async function readPinnedRangeFont(request, pin, mirrors) {
     // One global slot owns all source fallbacks for this bounded HTTP range.
     for (const source of mirrors) {
       if (signal.aborted) break;
-      const bytes = await readFontRangePart(source, signal, pin, index, count, () => { wholeFallback = true; });
+      if (failedSources.has(source.url)) continue;
+      const bytes = await readFontRangePart(source, signal, pin, index, count,
+        () => { wholeFallback = true; }, () => { failedSources.add(source.url); });
       if (bytes) {
         if (!signal.aborted) expectVerifiedProgress();
         return bytes;
@@ -1111,7 +1131,7 @@ async function readPinnedRangeFont(request, pin, mirrors) {
     const results = await Promise.allSettled([take(), take()]);
     if (results.some(result => result.status !== "fulfilled") || signal.aborted || complete !== pin.parts.length ||
         await fontDigest(output) !== pin.sha256) return {
-      response: null, wholeFallback: wholeFallback || complete === 0 || transferExpired, transferExpired,
+      response: null, wholeFallback: wholeFallback || complete === 0 || transferExpired || failedSources.size > 0, transferExpired,
     };
     return { wholeFallback: false, response: new Response(output, { status: 200, headers: {
       "content-type": pin.contentType, "content-length": String(pin.bytes),

@@ -6,11 +6,11 @@ Updated 2026-11-16 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-16 306已完成同源Linux310／PG216、1841SHA、旧档克隆与配套试发；公网R1过，R2 Native128080ms 超原120秒，已两端回退e0／Fo，原318／230／230及24配置保持，新QA保留。下一项受控复现分段正文总计时和死来源反复等头，不原样重发；29份WIP及原门槛保持，整体Goal active。[本轮原判定与回退](evidence/r16-cjk-progress-20261116/production/README.md)。
+2026-11-16 字体正文／失败来源候选已完成215项、严格构建、三场真实Chrome及英文／繁中补充整局。原失败保留，15覆盖恢复、29份WIP保持；未发布，正式仍e0／Fo。下一项新同源CI／旧档隔离及原两场公网，不重发306或放宽门槛，整体Goal active。[候选与范围](evidence/r16-font-body-progress-20261116/README.md)。
 
 ## 保留的当前未结项
 
-- [ ] CJK 长尾：306已配套试发，Linux310／PG216／1841SHA及旧档隔离通过，R1移动226ms／Native51176ms过；R2移动131ms但Native128080ms超120秒，已两端回退e0／Fo。原318／230／230行、24配置及29份WIP保持，新增QA保留。207项与实际Chrome等本地范围继续；下一项受控复现分段正文15秒总时限及失效CDN反复等头／后备次序，守原门槛，不原样重发。[证据与范围](evidence/r16-cjk-progress-20261116/production/README.md)
+- [ ] CJK 长尾：306原第二场Native128080ms失败及回退保留。基于2b7的新候选补15秒网络正文空闲续期、当前链失败范围来源切换；215项／严格构建／三场真实Chrome／英文和繁中补充整局通过。原清理断言、观察器和磁盘预检失败保留；29份WIP及原时限保持。尚未发布，下一项新同源CI／旧档与两场原公网资格。[新候选](evidence/r16-font-body-progress-20261116/README.md) · [旧试发与回退](evidence/r16-cjk-progress-20261116/production/README.md)
 
 - [x] e0整源字体中断分片已通过本地188项／真实Chrome恢复、匹配Linux／PG／SHA、成对发行与原两场公网；六字体／113／原时限保持。[已发布范围](evidence/r16-font-prefix-recovery-20261116/production/README.md)
 

@@ -1,0 +1,178 @@
+{
+  "files": [
+    {
+      "name": "validation.json",
+      "source": "D:/mir2-builds/r16-font-body-progress-20261116/validation.json",
+      "sourceBytes": 5466,
+      "sourceSha256": "a77d10fbc5309dc4332fd41f699db54b243bece8706545819e15bfda2eef2960",
+      "bytes": 5466,
+      "sha256": "a77d10fbc5309dc4332fd41f699db54b243bece8706545819e15bfda2eef2960",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "chrome-sc-chunks.json",
+      "source": "D:/mir2-builds/r16-font-body-progress-20261116/chrome-sc-chunks/receipt.json",
+      "sourceBytes": 26652,
+      "sourceSha256": "6f9ca732c38760014bc5f99dfb549f04b368cda510b04645cf5c30f1e237f884",
+      "bytes": 26652,
+      "sha256": "6f9ca732c38760014bc5f99dfb549f04b368cda510b04645cf5c30f1e237f884",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "chrome-tc-chunks.json",
+      "source": "D:/mir2-builds/r16-font-body-progress-20261116/chrome-tc-chunks/receipt.json",
+      "sourceBytes": 23407,
+      "sourceSha256": "212bb70f4824caad3c14362551aefe81c3c2a6eadc8f8c7f40b5dad5621cf7a5",
+      "bytes": 23407,
+      "sha256": "212bb70f4824caad3c14362551aefe81c3c2a6eadc8f8c7f40b5dad5621cf7a5",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "chrome-baseline-chunks.json",
+      "source": "D:/mir2-builds/r16-font-body-progress-20261116/chrome-baseline-chunks/receipt.json",
+      "sourceBytes": 18941,
+      "sourceSha256": "3b35d117aa93a7d09b6160d9075b4004c2dc87bd9f422a712be02363edce2d8b",
+      "bytes": 18941,
+      "sha256": "3b35d117aa93a7d09b6160d9075b4004c2dc87bd9f422a712be02363edce2d8b",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "chrome-header-failover.json",
+      "source": "D:/mir2-builds/r16-font-body-progress-20261116/chrome-header-failover/receipt.json",
+      "sourceBytes": 11320,
+      "sourceSha256": "858fc7f86798e07250df5c04d6a5d9f8a056570bcad2f134ed84b2319986ea4d",
+      "bytes": 11320,
+      "sha256": "858fc7f86798e07250df5c04d6a5d9f8a056570bcad2f134ed84b2319986ea4d",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "chrome-header-failover-body-observer.json",
+      "source": "D:/mir2-builds/r16-font-body-progress-20261116/chrome-header-failover-body-observer/receipt.json",
+      "sourceBytes": 11374,
+      "sourceSha256": "3e4f69ff74d8b11686f080f8e5e7c0fc5a4a575d4e11928e58a6d52e8534d665",
+      "bytes": 11374,
+      "sha256": "3e4f69ff74d8b11686f080f8e5e7c0fc5a4a575d4e11928e58a6d52e8534d665",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "focused-final.log",
+      "source": "D:/mir2-builds/r16-font-body-progress-20261116/focused-final.log",
+      "sourceBytes": 37012,
+      "sourceSha256": "c3cdf8e83d33362b41014df63d95f7d41781db1b5698fd4a8fcc45fb71e16d9f",
+      "bytes": 36080,
+      "sha256": "9b04c8a11aa476c28c21f8d598e91efdf54d3d963378653bc0e2244d7425779d",
+      "normalizedNewlines": true
+    },
+    {
+      "name": "adjacent-final.log",
+      "source": "D:/mir2-builds/r16-font-body-progress-20261116/adjacent-final.log",
+      "sourceBytes": 15518,
+      "sourceSha256": "48893647e07c41addc43d1cfa88b2641936c20df32bbe58a9a9c30df816b19d8",
+      "bytes": 15126,
+      "sha256": "4747a248b51e3d71ceef14c8e809856374ba7684ee7b288196f601a0f0d77138",
+      "normalizedNewlines": true
+    },
+    {
+      "name": "before-regressions.log",
+      "source": "D:/mir2-builds/r16-font-body-progress-20261116/before-regressions.log",
+      "sourceBytes": 4144,
+      "sourceSha256": "c84d1518369e42f4556e2182ce4fce596e2c8a6cd6b2c2809314b5c7001967ef",
+      "bytes": 4054,
+      "sha256": "0b56a513a392745f93dc94bfae6fe888d5bfb8e0e9952404170e5668b78b56c9",
+      "normalizedNewlines": true
+    },
+    {
+      "name": "six-original-fonts.png",
+      "source": "D:/mir2-builds/r16-font-body-progress-20261116/chrome-sc-chunks/six-original-fonts-after-restart.png",
+      "sourceBytes": 21149,
+      "sourceSha256": "9c5da663ff478575dd2f285740610d556671a918dae450b35b52a280cb1c311e",
+      "bytes": 21149,
+      "sha256": "9c5da663ff478575dd2f285740610d556671a918dae450b35b52a280cb1c311e",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "english-native-quest.png",
+      "source": "D:/mir2-builds/r16-font-body-progress-20261116/world-r1/run-1/first-entry-diary-open.png",
+      "sourceBytes": 1361742,
+      "sourceSha256": "be758d439107efeb7f6c37b2ed00fc7b6ca71a91a618163f01195f3bf30903c7",
+      "bytes": 1361742,
+      "sha256": "be758d439107efeb7f6c37b2ed00fc7b6ca71a91a618163f01195f3bf30903c7",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "traditional-native-quest-supplement.png",
+      "source": "F:/mir2-builds/r16-font-body-progress-20261116/world-r3-seeded-cache/run-2/first-entry-diary-open.png",
+      "sourceBytes": 1355740,
+      "sourceSha256": "0b69fa202bbb35762ca38337c26887b9dc1221e1d6ab9a0ff651a1abfcd6e1df",
+      "bytes": 1355740,
+      "sha256": "0b69fa202bbb35762ca38337c26887b9dc1221e1d6ab9a0ff651a1abfcd6e1df",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "preceding-public-failure.json",
+      "source": "E:/mir2-player-journey/mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/font-tail-diagnosis.json",
+      "sourceBytes": 14265,
+      "sourceSha256": "590a25521333122de70c86949a955c7f49ba99ca8ad01034e4228a7bcc83c3cd",
+      "bytes": 14265,
+      "sha256": "590a25521333122de70c86949a955c7f49ba99ca8ad01034e4228a7bcc83c3cd",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "disk-preflight-failure.json",
+      "source": "D:/mir2-builds/r16-font-body-progress-20261116/world-r3-seeded-cache/preflight-failure.json",
+      "sourceBytes": 288,
+      "sourceSha256": "bdb608c47445a64e013b6d71126062732fb833b295e52776cb0cee97e65ffea9",
+      "bytes": 288,
+      "sha256": "bdb608c47445a64e013b6d71126062732fb833b295e52776cb0cee97e65ffea9",
+      "normalizedNewlines": false
+    }
+  ],
+  "privatePins": [
+    {
+      "path": "D:/mir2-builds/r16-font-body-progress-20261116/build-receipt-r1.json",
+      "bytes": 16162,
+      "sha256": "d5a7227d02f1fca097fd5401568be3620e3c3064856534357cba5e250efd4714"
+    },
+    {
+      "path": "D:/mir2-builds/r16-font-body-progress-20261116/candidate-source.json",
+      "bytes": 19491,
+      "sha256": "ddd19042953bb4cfa1b8a5b9ca33d4d27606778807811f6738b120f1f7b90e33"
+    },
+    {
+      "path": "D:/mir2-builds/r16-font-body-progress-20261116/private-source-restored.json",
+      "bytes": 138,
+      "sha256": "c72d8df8afdeab93fd2bfa8f10574d1e75df3eee780781baead4558e2741649a"
+    },
+    {
+      "path": "D:/mir2-builds/r16-font-body-progress-20261116/preserved-wip-before.json",
+      "bytes": 5257,
+      "sha256": "55a6985060af800fcfd3dd0c9a0ca4674618296f5379da3b37424386713c0efc"
+    },
+    {
+      "path": "D:/mir2-builds/r16-font-body-progress-20261116/profile-relocations.json",
+      "bytes": 1086,
+      "sha256": "93281e9607a110a1217822c736544db15f984c2aac9e011bcdd02f5ad1b9a0f6"
+    },
+    {
+      "path": "D:/mir2-builds/r16-font-body-progress-20261116/world-r1/run-1/receipt.json",
+      "bytes": 85334,
+      "sha256": "d4ba89bd72edb947e811a5e0d63ca63064fedf09f22d3717f24a725a024c1964"
+    },
+    {
+      "path": "D:/mir2-builds/r16-font-body-progress-20261116/world-r2/run-2/receipt.json",
+      "bytes": 75555,
+      "sha256": "e4e240718be430b3e2189c9e21ebca7bb9a8b6b5d99ead500ec23e4534cdea3b"
+    },
+    {
+      "path": "F:/mir2-builds/r16-font-body-progress-20261116/world-r3-seeded-cache/run-2/receipt.json",
+      "bytes": 59088,
+      "sha256": "6d0b2a8dafd9933e353d38d602642e48b0ed4bb14d25740e960aaf23d630518d"
+    },
+    {
+      "path": "F:/mir2-builds/r16-font-body-progress-20261116/world-r3-seeded-cache/preparation.json",
+      "bytes": 5436,
+      "sha256": "6b05f0aeee2c51a4da1dc879e45272d64b824f08b13402a7f88bea1d47b25b59"
+    }
+  ],
+  "authCredentialsAndAccountDataNotPublished": true
+}
