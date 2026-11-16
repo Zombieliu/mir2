@@ -1,0 +1,157 @@
+{
+  "files": [
+    {
+      "name": "outcome.json",
+      "bytes": 4466,
+      "sha256": "b27311371518ce2d42e898a93a73de516d3cf61d9b0303155c50b8f07a3ed9db"
+    },
+    {
+      "name": "auth-handoff-diagnosis.json",
+      "bytes": 1731,
+      "sha256": "6bda7f03329788a1de9470c07de7e24388064743e17c3849052a38236b97d3c1"
+    },
+    {
+      "name": "linux-package-verification.json",
+      "bytes": 819,
+      "sha256": "6b1f2b9fae38a249c043f76b84854238e07fc767c60af18a1fea3c265c17c7c9"
+    },
+    {
+      "name": "artifact-transfer.json",
+      "bytes": 908,
+      "sha256": "9ca380cb8884cf480cd039a9e1c6f0a41fcb6393fe9b83a8dac210563a03b265"
+    },
+    {
+      "name": "original-r1-gates.json",
+      "bytes": 810,
+      "sha256": "cdc4e2d2cb5b70dfad44019d96e731d046042f2e8ec3a96c7e2da773daccacde"
+    },
+    {
+      "name": "web-jobs.json",
+      "bytes": 3630,
+      "sha256": "ae8fa729dfe273266763ed6e030b6911c8abb96398fe123a73c9efc5a27bef9e"
+    },
+    {
+      "name": "ordinary-canary.json",
+      "bytes": 2428,
+      "sha256": "2b1fd3680dfc5b88d23099fcb80f2bbb39ab5a5b002414a844e34342cab7710a"
+    },
+    {
+      "name": "postrollback-qr.json",
+      "bytes": 1129,
+      "sha256": "e0be87ce4b773563617e485e2c5c491df620f7c049c7012fa5fa182a8e9d80c9"
+    },
+    {
+      "name": "candidate-asset-readback.json",
+      "bytes": 4170,
+      "sha256": "d8255f690f72a0dbe208e36e78239e2b6781ac8a53a18cfcc2af86f2c6f1023c"
+    }
+  ],
+  "privatePins": [
+    {
+      "file": "artifact-info.json",
+      "bytes": 937,
+      "sha256": "f3f765916d4d314cafe91678a7e7884b8b352172058213ebdf0771d97897c776"
+    },
+    {
+      "file": "download-attempt1-terminal.json",
+      "bytes": 371,
+      "sha256": "ee0b812237c43fdf47514cac9e9819b3fd4a53bcff15ac84e6796e1070e62fa2"
+    },
+    {
+      "file": "linux-package-verification.json",
+      "bytes": 839,
+      "sha256": "d872ea5b673876473e7d3167729d528ad2364b1f9942155af525dcb73dff4606"
+    },
+    {
+      "file": "server-script-pins.json",
+      "bytes": 2930,
+      "sha256": "aa7a942511b6ad33b920b57ad3539a4edd53d0199a7e3870d0d6491de2910c2f"
+    },
+    {
+      "file": "remote-backup-r1.json",
+      "bytes": 10297,
+      "sha256": "2f5c68c4b7f293bd3afed3ddc22e092f03528dfa419d8199e92d26e4030e4a3f"
+    },
+    {
+      "file": "remote-clone-r1.json",
+      "bytes": 1020,
+      "sha256": "808367097299c63e480b0f208e13c158aac4c3d4584c0d76a3b202be2cb38ef3"
+    },
+    {
+      "file": "remote-canary-protocol-r1.json",
+      "bytes": 2215,
+      "sha256": "895d671dbbd0b924697978f2d169f59b3c03a24659e55856a574c484514911cc"
+    },
+    {
+      "file": "remote-preswitch-r1.json",
+      "bytes": 4784,
+      "sha256": "83dbe2ab7be982bbee0d0a35e361b2157396fa79e96f1d71d334818292f7d922"
+    },
+    {
+      "file": "remote-rollout-r1.json",
+      "bytes": 1612,
+      "sha256": "336634d9c76ba2a1a3101f19995336a2928123501337a40553c08a076f516c5b"
+    },
+    {
+      "file": "remote-backend-rollback-r1.json",
+      "bytes": 1081,
+      "sha256": "9fd57312b1b89beb26a4a8d7e12f8828c5eca7c93ecab4ea207aebbc5d8361bc"
+    },
+    {
+      "file": "remote-postrollback-readonly-r1.json",
+      "bytes": 1450,
+      "sha256": "fbf489588d09d7e573bc502aaf7349bd91e5d03a103acb4c0acf9e6496c4a15f"
+    },
+    {
+      "file": "owned-ssh-closed-after-rollback.json",
+      "bytes": 299,
+      "sha256": "71be821d6a0a7bd4bb5962f2fb1273e4008498105cadb8541dc8d5ca296c3b04"
+    },
+    {
+      "file": "public-r1/desktop-font-body-r1/receipt.json",
+      "bytes": 9655,
+      "sha256": "1e759076e796cdf896b1c539afc14827280a122f354ac4d8e5a3ec62c3dd402d"
+    },
+    {
+      "file": "public-r1/approval-receipt.json",
+      "bytes": 1821,
+      "sha256": "527de57f4009e4b94f02b3e1fb39741b3c7569d5a6ce773929b25e6df8cd6adc"
+    },
+    {
+      "file": "public-r1/browser-closed.json",
+      "bytes": 60,
+      "sha256": "c202e11ed9751123317cd66ab0f6d30df414cc4ad93e2fa1e6ace6f079e2b66d"
+    },
+    {
+      "file": "public-r1/wallet-network-guard.json",
+      "bytes": 228,
+      "sha256": "0be00d3039e2c3b10cec31be8d79f0743bbfb3876fac9f1731882537e492a407"
+    },
+    {
+      "file": "public-r1/first-party-signed-summary.json",
+      "bytes": 7584,
+      "sha256": "66cfb79a491029dae30fd16cd9aaea0c21e7479c0cb35bef4977c818c6f73cb8"
+    },
+    {
+      "file": "public-r1/preparation.json",
+      "bytes": 14079,
+      "sha256": "e24c9df82671d01977dd9d9e5c3fae5da8c1128c10607eef52a385a85195dbb7"
+    },
+    {
+      "file": "public-r2/preparation.json",
+      "bytes": 14079,
+      "sha256": "1c78232c3e3e1c2129fceeca8c4c5582955b5e1e08b6b062db792b67ca7c0568"
+    },
+    {
+      "file": "post-rollback-qr/qr-zh-cn-receipt.json",
+      "bytes": 2374,
+      "sha256": "764f78064adf9962d07b5e8af7db8b97872f84a10cfef49cf0f640caae125fc8"
+    },
+    {
+      "file": "post-rollback-qr/qr-zh-tw-receipt.json",
+      "bytes": 2376,
+      "sha256": "bef86b1fecea29eb9eea9c3dd78aeb2245cc7c19f60016fd121852b1b534393c"
+    }
+  ],
+  "rawAuthIntentSessionProofWalletSecretAndAccountRowsNotPublished": true
+}

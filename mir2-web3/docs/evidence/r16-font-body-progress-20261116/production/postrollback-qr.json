@@ -1,0 +1,42 @@
+[
+  {
+    "locale": "zh-CN",
+    "passed": true,
+    "checks": {
+      "exactRevision": true,
+      "nativeBrowserLocale": true,
+      "noSplitLocaleRequestsBeforeAuth": true,
+      "localizedTitle": true,
+      "firstPartyLink": true,
+      "renderedQr": true,
+      "sameIntentPending": true,
+      "localizedPending": true,
+      "normalCancel": true,
+      "pollingStopped": true,
+      "remainedLogin": true
+    },
+    "pollsAfterCancel": 0,
+    "browserClosed": true,
+    "scope": "Unsigned actual QR pixels/pending/cancel; no approved login assertion."
+  },
+  {
+    "locale": "zh-TW",
+    "passed": true,
+    "checks": {
+      "exactRevision": true,
+      "nativeBrowserLocale": true,
+      "noSplitLocaleRequestsBeforeAuth": true,
+      "localizedTitle": true,
+      "firstPartyLink": true,
+      "renderedQr": true,
+      "sameIntentPending": true,
+      "localizedPending": true,
+      "normalCancel": true,
+      "pollingStopped": true,
+      "remainedLogin": true
+    },
+    "pollsAfterCancel": 0,
+    "browserClosed": true,
+    "scope": "Unsigned actual QR pixels/pending/cancel; no approved login assertion."
+  }
+]

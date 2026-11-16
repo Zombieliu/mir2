@@ -1,0 +1,52 @@
+{
+  "kind": "observed-public-wallet-approval-not-handed-to-game",
+  "source": "8bf3dbcbeae86c0f4782e2c7dcdd8dd203756efe",
+  "exactOriginalFailure": "APPROVED_WALLET_LOGIN_NOT_OBSERVED",
+  "desktopEpoch": 1794801080001,
+  "qrReady": "2026-11-16T03:51:54.983Z",
+  "qrRemainingMsAtHandoff": 118872,
+  "phoneApprovalStarted": "2026-11-16T03:52:19.814Z",
+  "phoneApprovalFinished": "2026-11-16T03:52:23.413Z",
+  "approvalAfterQrReadyMs": 28430,
+  "reportedQrLifetimeRemainingAfterApprovalMs": 90442,
+  "walletApproval": {
+    "passed": true,
+    "exactSession": true,
+    "oneUiClick": true,
+    "oneApprovedLoginOperation": true,
+    "forbiddenOperations": 0,
+    "phoneSizedOfficialTestnet": true,
+    "physicalPhoneCamera": false
+  },
+  "desktop": {
+    "pollResponses": 11,
+    "httpStatuses": [
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200
+    ],
+    "observedStates": [
+      "pending"
+    ],
+    "httpErrors": 0,
+    "channelExchangeRequests": 0,
+    "gameSockets": 0,
+    "loginSuccess": 0,
+    "newCharacter": 0,
+    "startGame": 0,
+    "pageErrors": 0,
+    "consoleErrors": 0,
+    "maxObservedMainThreadLongTaskMs": 69,
+    "observedLongTasks": 1
+  },
+  "boundary": "Failure precedes roster and gameplay. Runtime/Native/font113/movement gates were not reached or measured. Signed approval within reported lifetime and69ms maximum observed long task narrow the next investigation to status handoff; they do not establish a cache/relay/server cause.",
+  "next": "Inspect existing protected intent polling, actual pending response/header timestamps and relay consistency with a controlled replay; do not redeploy8bf unchanged or widen original gates."
+}

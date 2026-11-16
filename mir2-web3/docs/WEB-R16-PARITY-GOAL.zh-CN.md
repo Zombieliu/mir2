@@ -1,6 +1,6 @@
 # Windows R16 与 Web 1:1 验收
 
-2026-11-16 基于2b7的字体正文／失败来源候选已通过215项、严格构建、三场真实Chrome、英文整局和明确过期缓存的繁中补充整局。原繁中清理断言／观察器／磁盘预检失败保留；15覆盖恢复、29份WIP保持。未发布，正式仍e0／Fo；下一项新同源CI、旧档隔离和原两场公网，原8／65／120及全六字体／113门槛保持。306第二场Native128080ms失败与回退不改判；首次冷Q／语言／三职业／阿洛及全部1:1继续，整体Candidate／Accepted未完成，Goal active。[新候选](evidence/r16-font-body-progress-20261116/README.md) · [旧试发与回退](evidence/r16-cjk-progress-20261116/production/README.md)。
+2026-11-16 8bf字体候选已通过215项／严格构建／Chrome／本地整局、Linux310／PG216／1841SHA和旧档隔离并配套试发。原R1真实签名后桌面11次200仍pending、交换／WS为0，原APPROVED_WALLET_LOGIN_NOT_OBSERVED失败；未进游戏，字体／Native性能未测，R2未执行。已两端回退e0／Fo，原320／232／232行、24配置与29份WIP保持；简繁pending／取消复验不关闭签名交接。下一项受控定位授权状态，原8／65／120及六字体113门槛保持，不重发8bf／306。首次冷Q、语言、三职业完整1–30、战斗／组队／交易／阿洛、技能地图和Native同档仍属完整目标，整体Candidate／Accepted未完成，Goal active。[当前失败与回退](evidence/r16-font-body-progress-20261116/production/README.md) · [306原超时](evidence/r16-cjk-progress-20261116/production/README.md)。
 
 2026-11-16 20e79131a2必需HUD优先级候选已推送；173项／严格构建／两整局通过，匹配Linux310／PG216及1841文件SHA、54提交／296文件闭包和80发布保护通过。实际切Web Bhnp及同源网关后，公网R1扫码签名／移动／六字体113／Q／Worker／注销通过分项，但完整行走包原65秒未过、Native133427ms超120秒，整轮false，未跑R2。已两端回退20de／AWss＋fd3，独立版本／alias及简繁扫码复验；原310／222／222行与22配置保持，新QA进度保留。下一项复现首批基础HUD图与其他HUD同批请求的排序／缓存及准入阶段，核对行走两次20秒后回退和SC源切换；不原样重发或放宽门槛。29份原WIP保持，其他1:1继续，Goal active。[公网失败、诊断边界及恢复](evidence/r16-hud-admission-20261115/production/README.md)。
 

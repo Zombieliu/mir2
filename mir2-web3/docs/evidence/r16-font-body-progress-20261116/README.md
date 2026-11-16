@@ -3,7 +3,8 @@
 基于 Windows R16 `codex/windows-player-journey` 的
 `2b7b5d7079300f45315e172d4c58784aaed6fb5c`，本地候选 `r16-font-body-7d3c6c83`。
 本轮修复、215 项检查、真实 Chrome 及隔离构建通过；英文完整流程和繁中补充流程通过。
-**尚未发布**。正式仍为 e0／Fo；新的同源 CI、旧档隔离和两场原公网门槛仍须完成。
+已完成新的同源 CI、旧档隔离并配套试发；原第一场失败于签名后的桌面登录交接，
+尚未进游戏，已两端回退 e0／Fo。[原判定、交接观测与回退](production/README.md)。
 整体 1:1 Candidate、Accepted 均未完成，Goal active。
 
 ## 依据与实现
@@ -77,8 +78,9 @@ Gateway 均关闭。只迁移了本轮已关闭的测试浏览器档案，保留
 
 ## 后续范围
 
-新候选须取得新的不可变源码与发布控制配置、Linux／PG／SHA 和旧档隔离资格，再按原门槛
-做两场公网。不得重发已回退的 306、重跑其已完成的控制流程或放宽时限。
+本候选已取得不可变源码／发布配置、Linux／PG／SHA 和旧档隔离资格。试发首场的
+钱包批准在桌面未被观测到，未到字体性能测量；已回退。下一项受控定位授权状态交接，
+再以新源码按原门槛验证，不原样重发 8bf／306 或重跑其已完成控制流程。
 
 应用源码已提交并推送为 `8bf3dbcbeae86c0f4782e2c7dcdd8dd203756efe`。
 新发布配置以上版 e0／Fo 为实际回退基准；独立 Vercel alias／部署、Web 版本和网关健康一致。
@@ -86,8 +88,9 @@ Gateway 均关闭。只迁移了本轮已关闭的测试浏览器档案，保留
 只变更许可的源码／字节 pin 与精确测试，**88 项发布保护通过**，未切生产。
 [配置](release/release-pin.json) · [源码闭包](release/source-closure.json) ·
 [独立正式读回](release/baseline-readback.json) · [88 项输出](release/release-guards.log)。
-新的 [Linux／PG 构建](https://github.com/Zombieliu/mir2/actions/runs/43795056603)仍在进行，
-尚未据此声明同源服务包、旧档或生产资格。
+新的 [Linux／PG 构建](https://github.com/Zombieliu/mir2/actions/runs/43795056603)已完成；
+310／216 项、1,841 SHA 和旧档普通协议通过。已尝试正式发布，但原第一场授权交接失败，
+未留正式，不声明完整公网资格。[发行、原失败和数据保全](production/README.md)。
 
 首次冷 Q 的备用布局／黑帧、系统英文欢迎、更多地图／断网、三职业完整 1–30、阿洛、
 技能及 Windows 实际窗口、实体手机仍按原范围继续。
